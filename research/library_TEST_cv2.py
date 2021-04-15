@@ -1,8 +1,10 @@
 """
-File: library_TEST.py
+File: library_TEST_cv2.py
 Created by Andrew Ingson (aings1@umbc.edu)
 Date: 4/15/2021
 CMSC 491 Special Topics - Computer Vision
+
+https://github.com/linxiaohui/mtcnn-opencv
 
 """
 
