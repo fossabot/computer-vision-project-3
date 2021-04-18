@@ -29,6 +29,8 @@ from __future__ import division
 from __future__ import print_function
 
 from scipy import misc
+import imageio
+from PIL import Image
 import sys
 import os
 import argparse
@@ -85,7 +87,7 @@ def main(args):
                 print(image_path)
                 if not os.path.exists(output_filename):
                     try:
-                        img = misc.imread(image_path)
+                        img = imageio.imread(image_path) # misc.imread(image_path)
                     except (IOError, ValueError, IndexError) as e:
                         errorMessage = '{}: {}'.format(image_path, e)
                         print(errorMessage)
@@ -128,7 +130,7 @@ def main(args):
                                 bb[2] = np.minimum(det[2] + args.margin / 2, img_size[1])
                                 bb[3] = np.minimum(det[3] + args.margin / 2, img_size[0])
                                 cropped = img[bb[1]:bb[3], bb[0]:bb[2], :]
-                                scaled = misc.imresize(cropped, (args.image_size, args.image_size), interp='bilinear')
+                                scaled = np.array(Image.fromarray(cropped).resize((args.image_size, args.image_size))) # misc.imresize(cropped, (args.image_size, args.image_size), interp='bilinear')
                                 nrof_successfully_aligned += 1
                                 filename_base, file_extension = os.path.splitext(output_filename)
                                 if args.detect_multiple_faces:
@@ -158,7 +160,7 @@ def parse_arguments(argv):
                         help='Shuffles the order of images to enable alignment using multiple processes.',
                         action='store_true')
     parser.add_argument('--gpu_memory_fraction', type=float,
-                        help='Upper bound on the amount of GPU memory that will be used by the process.', default=1.0)
+                        help='Upper bound on the amount of GPU memory that will be used by the process.', default=0.75)
     parser.add_argument('--detect_multiple_faces', type=bool,
                         help='Detect and align multiple faces per image.', default=False)
     return parser.parse_args(argv)
