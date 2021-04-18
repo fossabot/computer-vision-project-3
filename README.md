@@ -10,6 +10,6 @@
 
 ## Installation
 
-* You'll need to have a 64 bit python installation (3.6 - 3.8) along with tensorflow, numpy, opencv2, [mtcnn](https://github.com/ipazc/mtcnn) (possibly this one? [alt](https://github.com/jonaphin/facenet)), [facetnet](https://github.com/davidsandberg/facenet), and matplotlib
+* You'll need to have a 64 bit python installation (3.6 - 3.8) along with tensorflow, numpy, opencv2, [mtcnn](https://github.com/ipazc/mtcnn) (possibly this one? [alt](https://github.com/jonaphin/facenet)), [facetnet](https://github.com/davidsandberg/facenet), Pillow (PIL) and matplotlib
 
 ![chas](research/result.jpg)
