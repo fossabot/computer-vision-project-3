@@ -1,4 +1,6 @@
 """An example of how to use your own dataset to train a classifier that recognizes people.
+
+FROM HERE: https://github.com/davidsandberg/facenet/blob/master/src/classifier.py
 """
 # MIT License
 #
