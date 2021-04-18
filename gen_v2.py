@@ -38,6 +38,19 @@ from sklearn.svm import SVC
 
 
 def main(args):
+    gpus = tf.config.list_physical_devices('GPU')
+    if gpus:
+        # Restrict TensorFlow to only allocate 1GB of memory on the first GPU
+        try:
+            tf.config.experimental.set_virtual_device_configuration(
+                gpus[0],
+                [tf.config.experimental.VirtualDeviceConfiguration(memory_limit=4096)])
+            logical_gpus = tf.config.experimental.list_logical_devices('GPU')
+            print(len(gpus), "Physical GPUs,", len(logical_gpus), "Logical GPUs")
+        except RuntimeError as e:
+            # Virtual devices must be set before GPUs have been initialized
+            print(e)
+
     with tf.Graph().as_default():
 
         with tf.compat.v1.Session() as sess:
@@ -80,6 +93,7 @@ def main(args):
             nrof_batches_per_epoch = int(math.ceil(1.0 * nrof_images / args.batch_size))
             emb_array = np.zeros((nrof_images, embedding_size))
             for i in range(nrof_batches_per_epoch):
+                print("EPCOH:", i)
                 start_index = i * args.batch_size
                 end_index = min((i + 1) * args.batch_size, nrof_images)
                 paths_batch = paths[start_index:end_index]
