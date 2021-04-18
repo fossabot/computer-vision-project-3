@@ -10,7 +10,7 @@
 
 ## Installation
 
-#### Required
+#### _Required_
 * You'll need to have a 64 bit python installation (3.6 - 3.8) along with the following libraies:
     - tensorflow 
     - numpy 
@@ -21,7 +21,7 @@
     - Pillow (PIL) 
     - matplotlib
     
-#### Optional
+#### _Optional_
 * These libraries are used in the research code
     - [mtcnn](https://github.com/ipazc/mtcnn) 
     
@@ -34,13 +34,13 @@
         * ```shell
             python gen_v2.py TRAIN input models/20180402-114759.pb models/my_classifier.pkl --batch_size 1000
             ```
-3. Run `gen_v2.py` in CLASSIFY mode to generate a classifier
+3. Run `gen_v2.py` in CLASSIFY mode to test your new classifier
     * If you are using pycharm this can be done by selecting `CLASSIFY_gen_v2` as your configuration
     * Command line structure is as follows:
         * ```shell
             python gen_v2.py CLASSIFY input models/20180402-114759.pb models/my_classifier.pkl --batch_size 1000
             ```
-4. ???
-5. profit
+4. _???_
+5. **profit**
 
 ![chas](research/result.jpg)
