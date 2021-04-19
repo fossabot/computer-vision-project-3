@@ -17,10 +17,11 @@ from tensorflow.keras import activations
 import numpy as np
 import matplotlib
 import matplotlib.pyplot as plt
+import pickle
 import cv2
 import os
 import facenet
-import detect_face
+import models.detect_face as detect_face
 
 
 def main():
