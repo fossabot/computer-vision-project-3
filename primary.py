@@ -20,7 +20,6 @@ import matplotlib.pyplot as plt
 import pickle
 import cv2
 import os
-import facenet
 import models.detect_face as detect_face
 
 
