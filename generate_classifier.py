@@ -6,18 +6,26 @@ CMSC 491 Special Topics - Computer Vision
 
 """
 
+import argparse
 import os
 
 import mtcnn
-import tensorflow as tf
 
 from helper_functions import *
 
 
 def main():
+    parser = argparse.ArgumentParser(description='Classifier Generator')
+    parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
+    args = parser.parse_args()
+
+    if args.verbosity > 0:
+        verbose = True
+    else:
+        verbose = False
     input_directory = 'input'
+    # hold references to completed classes
     completed_classes = dict()
-    verbose = True
     # start mtcnn backend
     detector = mtcnn.MTCNN()
 
@@ -39,7 +47,7 @@ def main():
                     # get face location from mtcnn
                     results = detector.detect_faces(img)
                     # if an image is found
-                    if results:
+                    if len(results) > 0:
                         # trim the sample image to be only the target face
                         bounding_box = results[0]['box']
                         bounding_box[0], bounding_box[1] = abs(bounding_box[0]), abs(bounding_box[1])
@@ -49,9 +57,7 @@ def main():
                         stage1 = face
 
                         # normalize the face image from uint8 to float64
-                        face_mean = face.mean()
-                        face_std = face.std()
-                        face = (face - face_mean) / face_std
+                        face = (face - face.mean()) / face.std()
                         stage2 = face
                         # resize the face image to the input tensor size for the model
                         face = cv2.resize(face, inp_size)
@@ -66,7 +72,7 @@ def main():
 
                             # resize image
                             resized = cv2.resize(face, dim, interpolation=cv2.INTER_AREA)
-                            cv2.imshow("face", resized)
+                            cv2.imshow("normalized float64", resized)
 
                             # create composite image to display each intermediary step
                             composite_img = np.zeros((inp_size[0] * 2, inp_size[1] * 2 * 4, 3), np.uint8)
@@ -76,7 +82,15 @@ def main():
                                 composite_img[0:inp_size[0] * 2,
                                 i * inp_size[0] * 2:inp_size[0] * 2 + i * inp_size[0] * 2,
                                 :] = cv2.resize(images[i], (320, 320), interpolation=cv2.INTER_AREA)
-                            cv2.imshow("composite face", composite_img)
+                            cv2.putText(composite_img, "original", (10, 310), cv2.FONT_HERSHEY_PLAIN, 1,
+                                        (255, 255, 255), 1)
+                            cv2.putText(composite_img, "detected face", (330, 310), cv2.FONT_HERSHEY_PLAIN, 1,
+                                        (255, 255, 255), 1)
+                            cv2.putText(composite_img, "normalized uint8 direct", (650, 310), cv2.FONT_HERSHEY_PLAIN, 1,
+                                        (0, 155, 255), 1)
+                            cv2.putText(composite_img, "normalized uint8 256x", (970, 310), cv2.FONT_HERSHEY_PLAIN, 1,
+                                        (255, 155, 0), 1)
+                            cv2.imshow("classifier preprocessing", composite_img)
 
                             # hold thingy so cv2 doesn't freak out
                             if cv2.waitKey(1) & 0xFF == ord('q'):
