@@ -8,15 +8,20 @@
   This project was for Special Topics: Computer Vision class at UMBC (CMSC 491).
 </p>
 
+# **THIS IS ALL WRONG! IGNORE THIS FOR NOW!**
+
 ## Installation
 
 #### _Required_
+
 * You'll need to have a 64 bit python installation (3.6 - 3.8) along with the following libraies:
-    - tensorflow 
-    - numpy 
+    - tensorflow
+    - numpy
     - opencv2
-    - ~~[facetnet](https://github.com/davidsandberg/facenet) (possibly this one? [alt](https://github.com/jonaphin/facenet))~~ Included locally because it needed changes specific to this project
-    - imageio 
+    - ~~[facetnet](https://github.com/davidsandberg/facenet) (possibly this
+      one? [alt](https://github.com/jonaphin/facenet))~~ Included locally because it needed changes specific to this
+      project
+    - imageio
     - scikit-image 
     - Pillow (PIL) 
     - matplotlib

@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="TRAIN_gen_v2" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="generate_classifier" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
     <module name="computer-vision-3" />
     <option name="INTERPRETER_OPTIONS" value="" />
     <option name="PARENT_ENVS" value="true" />
@@ -12,8 +12,8 @@
     <option name="ADD_CONTENT_ROOTS" value="true" />
     <option name="ADD_SOURCE_ROOTS" value="true" />
     <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-    <option name="SCRIPT_NAME" value="C:\Users\aings\Documents\gitTest\computer-vision-3\research\old\gen_v2.py" />
-    <option name="PARAMETERS" value="TRAIN input models/20180402-114759.pb models/my_classifier.pkl --batch_size 1000" />
+    <option name="SCRIPT_NAME" value="$PROJECT_DIR$/generate_classifier.py" />
+    <option name="PARAMETERS" value="" />
     <option name="SHOW_COMMAND_LINE" value="false" />
     <option name="EMULATE_TERMINAL" value="false" />
     <option name="MODULE_MODE" value="false" />
