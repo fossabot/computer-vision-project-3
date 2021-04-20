@@ -29,7 +29,7 @@ def scaling(x, scale):
     return x * scale
 
 
-def inception_resnet_v2():
+def inception_resnet_v2_pre():
     inputs = Input(shape=(160, 160, 3))
     x = Conv2D(32, 3, strides=2, padding='valid', use_bias=False, name='Conv2d_1a_3x3')(inputs)
     x = BatchNormalization(axis=3, momentum=0.995, epsilon=0.001, scale=False, name='Conv2d_1a_3x3_BatchNorm')(x)
@@ -692,6 +692,6 @@ def inception_resnet_v2():
     x = BatchNormalization(momentum=0.995, epsilon=0.001, scale=False, name='Bottleneck_BatchNorm')(x)
 
     # Create model
-    model = Model(inputs, x, name='inception_resnet_v1')
+    model = Model(inputs, x, name='inception_resnet_v2')
 
     return model
