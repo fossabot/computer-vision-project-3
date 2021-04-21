@@ -11,7 +11,6 @@ import os
 import pickle
 
 import cv2
-import mtcnn
 import numpy as np
 
 from config import *
@@ -29,8 +28,6 @@ def main():
     input_directory = 'input'
     # hold references to completed classes
     completed_classes = dict()
-    # start mtcnn backend
-    detector = mtcnn.MTCNN()
 
     for possible_class in os.listdir(input_directory):
         if "README" not in possible_class:
