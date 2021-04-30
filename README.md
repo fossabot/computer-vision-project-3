@@ -1,8 +1,8 @@
 <h1 align="center">
-   TensorFlow Unqiue Face Detection
+   Adaptive Home Surveillance Through Computer Vision
 </h1>
 <p align="center">
-   An implementation of a TensorFlow model to identify images containing certain faces
+   A TensorFlow project based on Inception ResNet v2 to dynamically detect new faces
  </p>
  <p align="center">
   This project was for Special Topics: Computer Vision class at UMBC (CMSC 491).

@@ -1,16 +1,28 @@
 """
 File: config.py
-Created by Andrew Ingson (aings1@umbc.edu)
+Created by Andrew Ingson (aings1@umbc.edu) & Chase Carbaugh (aings1@umbc.edu & chasec1@umbc.edu)
 Date: 4/19/2021
 CMSC 491 Special Topics - Computer Vision
 
-Helper functions
+Helper functions (get used by classifer and primary so they are in this file so we are DRY)
 """
+
+import os
 
 import mtcnn_cv2
 import tensorflow as tf
 
 import models.facenet_resnet_pretrained as facenet
+
+# what size image should the preprocessing create
+inp_size = (160, 160)
+# start mtcnn backend
+detector = mtcnn_cv2.MTCNN()
+# should tf use the gpu
+use_gpu = False
+
+if not use_gpu:
+    os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 gpus = tf.config.list_physical_devices('GPU')
 if gpus:
@@ -29,7 +41,3 @@ main_model = facenet.inception_resnet_v2_pre()
 main_model.load_weights("models/facenet_pretrained.h5")
 # applications.InceptionResNetV2(include_top=True, weights="imagenet", pooling='avg', classifier_activation='softmax')
 # applications.InceptionResNetV2(include_top=False, weights="imagenet", input_shape=(160, 160, 3), pooling='avg')
-
-inp_size = (160, 160)
-# start mtcnn backend
-detector = mtcnn_cv2.MTCNN()

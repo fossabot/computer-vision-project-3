@@ -73,10 +73,11 @@ def main():
             for clss in classifier:
                 # using cosine bc we are trying to find similarity between the found face and the classifiers
                 # loss of -1 means absolute similarity, loss of 1 means absolute dissimilarity
-                mse = losses.CosineSimilarity()
-                similarity = mse(classifier[clss], embedded_128).numpy()
+                cos_sim = losses.CosineSimilarity()
+                similarity = cos_sim(classifier[clss], embedded_128).numpy()
                 # if loss is below this value, we found a known face
-                recognition_thresh = -0.5
+                # -.35 seems to work better with masks
+                recognition_thresh = -0.40
                 if similarity < recognition_thresh and similarity < loss:
                     # update tracking vars to current best
                     found_class = True
