@@ -4,7 +4,7 @@ Created by Andrew Ingson (aings1@umbc.edu) & Chase Carbaugh (aings1@umbc.edu & c
 Date: 4/19/2021
 CMSC 491 Special Topics - Computer Vision
 
-Helper functions (get used by classifer and primary so they are in this file so we are DRY)
+Helper functions (get used by classifier and primary so they are in this file so we are DRY)
 """
 
 import os

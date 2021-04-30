@@ -22,7 +22,7 @@
     
 #### _Optional_
 
-* Setting up tensorflow to work with your gpu(s) will greatly speed up performance
+* Setting up tensorflow to work with your gpu(s) will ~~greatly~~_maybe not?_ speed up performance
     - [GPU Support](https://www.tensorflow.org/install/gpu)
 
 ## Execution
