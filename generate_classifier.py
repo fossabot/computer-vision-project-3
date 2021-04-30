@@ -7,10 +7,13 @@ CMSC 491 Special Topics - Computer Vision
 """
 
 import argparse
+import logging
 import pickle
+import time
 
 import cv2
 import numpy as np
+import progressbar
 
 from config import *
 
@@ -27,25 +30,40 @@ def main():
 
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-funneled\\lfw_funneled'
     input_directory = 'input'
+    # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-a\\lfw'
     # hold references to completed classes
     completed_classes = dict()
 
+    progressbar.streams.wrap_stderr()
+    logging.basicConfig(level=logging.DEBUG)
+
+    bar = progressbar.ProgressBar(max_value=len(os.listdir(input_directory)), redirect_stderr=True)
+    if verbose:
+        time.sleep(1)
+    bar.start()
+    # time.sleep(0.2)
+    class_count = 0
+
     for possible_class in os.listdir(input_directory):
+        class_count += 1
         if "." not in possible_class:
             combined_class_dir = os.path.join(input_directory, possible_class)
-            print("\n\nTraining on", len(os.listdir(combined_class_dir)), "for", possible_class)
+            # logging.debug("\n\nTraining on %d for %s", int(len(os.listdir(combined_class_dir))), possible_class)
             # set up varibles for inner loop
             prediction_results = []
             img_count = 0
             for source_image in os.listdir(combined_class_dir):
                 # skip readme files since they are not images
                 if "README" not in source_image:
-                    print(str(img_count) + ":", source_image)
+                    # update stats
+                    # print(str(img_count) + ":", source_image)
                     img_count += 1
+                    # pull the image from the source directory
                     img_path = os.path.join(combined_class_dir, source_image)
                     img = cv2.imread(img_path)
 
-                    if resize_inputs:
+                    # resize inputs if the source is bigger, THIS STEP MAKES THINGS GO FAST!
+                    if resize_inputs and len(img) > resize_target[0] and len(img[0]) > resize_target[1]:
                         img = cv2.resize(img, resize_target, interpolation=cv2.INTER_AREA)
 
                     # get face location from mtcnn
@@ -86,9 +104,10 @@ def main():
                                 images = [img, stage1, stage2, (stage2.astype(np.uint8) * 256)]
                                 # append each face to the composite
                                 for i in range(4):
+                                    # CV2 Resize: INTER_CUBIC is better quality, INTER_LINEAR is faster
                                     composite_img[0:inp_size[0] * 2,
                                     i * inp_size[0] * 2:inp_size[0] * 2 + i * inp_size[0] * 2,
-                                    :] = cv2.resize(images[i], (320, 320), interpolation=cv2.INTER_AREA)
+                                    :] = cv2.resize(images[i], (320, 320), interpolation=cv2.INTER_LINEAR)
                                 cv2.putText(composite_img, "original", (10, 310), cv2.FONT_HERSHEY_PLAIN, 1,
                                             (255, 255, 255), 1)
                                 cv2.putText(composite_img, "detected face", (330, 310), cv2.FONT_HERSHEY_PLAIN, 1,
@@ -101,19 +120,26 @@ def main():
                                             (255, 155, 0), 1)
                                 cv2.putText(composite_img, possible_class, (10, 20), cv2.FONT_HERSHEY_PLAIN, 1,
                                             (255, 255, 255), 1)
+                                cv2.putText(composite_img, source_image, (10, 40), cv2.FONT_HERSHEY_PLAIN, 1,
+                                            (255, 255, 255), 1)
+                                cv2.putText(composite_img,
+                                            str(img_count) + " of " + str(len(os.listdir(combined_class_dir))),
+                                            (10, 60), cv2.FONT_HERSHEY_PLAIN, 1,
+                                            (255, 255, 255), 1)
                                 cv2.imshow("classifier preprocessing", composite_img)
 
                                 # hold thingy so cv2 doesn't freak out
                                 if cv2.waitKey(1) & 0xFF == ord('q'):
                                     break
 
-                            # run the face through the model and append its results to the predictions for this class set
+                            # run the face through the model and append its results to the predictions for this class
+                            # set
                             prediction_results.append(main_model.predict(np.expand_dims(face, axis=0))[0])
                         else:
                             # raise an error if something has gone bad
                             raise ValueError("Sample image does not appear to contain face! (" + img_path + ")")
                     except ValueError as err:
-                        print(err)
+                        # print(err)
                         continue
 
             if len(prediction_results) > 0:
@@ -123,6 +149,9 @@ def main():
                 # (https://www.tensorflow.org/api_docs/python/tf/keras/utils/normalize)
                 preds = tf.keras.utils.normalize(np.expand_dims(preds, axis=0), order=2)[0]
                 completed_classes[possible_class] = preds
+
+        bar.update(class_count)
+    bar.finish()
 
     # save finished classifier in binary format
     pickle.dump(completed_classes, open(classifer_target, 'bw'))
