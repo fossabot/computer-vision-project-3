@@ -31,7 +31,7 @@ def main():
         verbose = False
 
     # load classifier dictionary back in
-    classifier = pickle.load(open("output/my_classifier.pkl", 'rb'))
+    classifier = pickle.load(open(classifer_target, 'rb'))
     # load webcam video
     cap = cv2.VideoCapture(0)
     total_frames = 0
@@ -123,10 +123,12 @@ def main():
         if verbose:
             # show fps
             fps = total_frames / (time.time() - strt)
-            best_clr = int(~frame[10, 20, 0]), int(~frame[10, 20, 1]), int(~frame[10, 20, 2])
+            best_clr = ~int(frame[10, 20, 0]), ~int(frame[10, 20, 1]), ~int(frame[10, 20, 2])
             cv2.putText(frame, f'Source FPS: {cap.get(cv2.CAP_PROP_FPS):.2f}', (10, 20), cv2.FONT_HERSHEY_PLAIN, 1,
                         best_clr, 1)
             cv2.putText(frame, f'Processed FPS: {fps:.2f}', (10, 40), cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
+            cv2.putText(frame, "Source: " + str(len(frame)) + "x" + str(len(frame[0])), (10, 60),
+                        cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
 
         # Display the resulting frame
         cv2.imshow('frame', frame)

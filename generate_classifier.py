@@ -24,6 +24,8 @@ def main():
         verbose = True
     else:
         verbose = False
+
+    # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-funneled\\lfw_funneled'
     input_directory = 'input'
     # hold references to completed classes
     completed_classes = dict()
@@ -42,6 +44,9 @@ def main():
                     img_count += 1
                     img_path = os.path.join(combined_class_dir, source_image)
                     img = cv2.imread(img_path)
+
+                    if resize_inputs:
+                        img = cv2.resize(img, resize_target, interpolation=cv2.INTER_AREA)
 
                     # get face location from mtcnn
                     results = detector.detect_faces(img)
@@ -120,7 +125,7 @@ def main():
                 completed_classes[possible_class] = preds
 
     # save finished classifier in binary format
-    pickle.dump(completed_classes, open('output/my_classifier.pkl', 'bw'))
+    pickle.dump(completed_classes, open(classifer_target, 'bw'))
 
     # clean up cv2 windows
     if verbose:

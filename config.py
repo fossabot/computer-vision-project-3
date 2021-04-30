@@ -20,6 +20,12 @@ inp_size = (160, 160)
 detector = mtcnn_cv2.MTCNN()
 # should tf use the gpu
 use_gpu = False
+# should inputs be resized
+resize_inputs = True
+# what size should the inputs be resized too
+resize_target = 250, 250
+# what classifier do we want to use
+classifer_target = "output/my_classifier.pkl"
 
 if not use_gpu:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"

@@ -22,7 +22,7 @@
     
 #### _Optional_
 
-* Setting up tensorflow to work with your gpu(s) will ~~greatly~~_maybe not?_ speed up performance
+* Setting up tensorflow to work with your gpu(s) will ~~greatly speed up performance~~ _maybe not?_
     - [GPU Support](https://www.tensorflow.org/install/gpu)
 
 ## Execution
@@ -57,3 +57,8 @@ Andrew Only
 Andrew and Unrecognized
 
 ![unrec](results/andrew_unrec.jpg)
+
+## Test Dataset
+
+For testing [Labeled Faces in the Wild](http://vis-www.cs.umass.edu/lfw/index.html#download) is used which is based
+on [this paper](http://vis-www.cs.umass.edu/papers/iccv07alignment.pdf)
