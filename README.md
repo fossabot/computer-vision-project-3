@@ -19,6 +19,7 @@
     - numpy
     - opencv2
     - mtcnn_opencv
+    - progressbar2
     
 #### _Optional_
 

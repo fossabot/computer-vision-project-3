@@ -7,7 +7,6 @@ CMSC 491 Special Topics - Computer Vision
 """
 
 import argparse
-import logging
 import pickle
 import time
 
@@ -35,13 +34,12 @@ def main():
     completed_classes = dict()
 
     progressbar.streams.wrap_stderr()
-    logging.basicConfig(level=logging.DEBUG)
 
-    bar = progressbar.ProgressBar(max_value=len(os.listdir(input_directory)), redirect_stderr=True)
     if verbose:
-        time.sleep(1)
+        time.sleep(0)
+        print("\n")
+    bar = progressbar.ProgressBar(max_value=len(os.listdir(input_directory)), redirect_stderr=True)
     bar.start()
-    # time.sleep(0.2)
     class_count = 0
 
     for possible_class in os.listdir(input_directory):
@@ -113,19 +111,16 @@ def main():
                                 cv2.putText(composite_img, "detected face", (330, 310), cv2.FONT_HERSHEY_PLAIN, 1,
                                             (255, 255, 255), 1)
                                 cv2.putText(composite_img, "normalized uint8 direct", (650, 310),
-                                            cv2.FONT_HERSHEY_PLAIN, 1,
-                                            (0, 155, 255), 1)
+                                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 155, 255), 1)
                                 cv2.putText(composite_img, "normalized uint8 256x", (970, 310), cv2.FONT_HERSHEY_PLAIN,
-                                            1,
-                                            (255, 155, 0), 1)
+                                            1, (255, 155, 0), 1)
                                 cv2.putText(composite_img, possible_class, (10, 20), cv2.FONT_HERSHEY_PLAIN, 1,
                                             (255, 255, 255), 1)
                                 cv2.putText(composite_img, source_image, (10, 40), cv2.FONT_HERSHEY_PLAIN, 1,
                                             (255, 255, 255), 1)
                                 cv2.putText(composite_img,
                                             str(img_count) + " of " + str(len(os.listdir(combined_class_dir))),
-                                            (10, 60), cv2.FONT_HERSHEY_PLAIN, 1,
-                                            (255, 255, 255), 1)
+                                            (10, 60), cv2.FONT_HERSHEY_PLAIN, 1, (255, 255, 255), 1)
                                 cv2.imshow("classifier preprocessing", composite_img)
 
                                 # hold thingy so cv2 doesn't freak out

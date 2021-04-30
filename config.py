@@ -7,6 +7,7 @@ CMSC 491 Special Topics - Computer Vision
 Helper functions (get used by classifier and primary so they are in this file so we are DRY)
 """
 
+import logging
 import os
 
 import mtcnn_cv2
@@ -26,6 +27,9 @@ resize_inputs = True
 resize_target = 250, 250
 # what classifier do we want to use
 classifer_target = "output/my_classifier.pkl"
+
+log = logging.getLogger('tensorflow')
+log.setLevel(logging.ERROR)
 
 if not use_gpu:
     os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
