@@ -20,6 +20,10 @@
     - opencv2
     - mtcnn_opencv
     - progressbar2
+* Try running this command:
+    - ```shell
+        pip install -r requirements.txt
+        ```
     
 #### _Optional_
 
