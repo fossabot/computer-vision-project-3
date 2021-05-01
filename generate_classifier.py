@@ -28,7 +28,7 @@ def main():
         verbose = False
 
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-funneled\\lfw_funneled'
-    input_directory = 'input'
+    input_directory = 'C:\\Users\\chase\\Downloads\\lfw-a\\lfw'
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-a\\lfw'
     # hold references to completed classes
     completed_classes = dict()

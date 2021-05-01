@@ -90,7 +90,7 @@ def main():
                     best_clss = clss
                     loss = similarity
 
-            # create labels for the face to go into the fram
+            # create labels for the face to go into the frame
             if verbose:
                 # create circles showing the key points
                 keypoints = data['keypoints']
@@ -115,7 +115,7 @@ def main():
                                 cv2.FONT_HERSHEY_PLAIN, 1.5,
                                 (255, 255, 255), 2)
                 # save image of unknown face
-                new_img_name = ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
+                new_img_name = 'unknown'+''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                 img_path = 'input/' + unknown_dir
                 if not os.path.exists(img_path):
                     os.mkdir(img_path)
