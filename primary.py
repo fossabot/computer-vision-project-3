@@ -8,6 +8,8 @@ CMSC 491 Special Topics - Computer Vision
 
 import argparse
 import pickle
+import random
+import string
 import time
 
 import cv2
@@ -21,7 +23,7 @@ from config import *
 def main():
     print("----- Project 3 -----")
 
-    parser = argparse.ArgumentParser(description='Classifier Generator')
+    parser = argparse.ArgumentParser(description='Adaptive Security Camera')
     parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
     args = parser.parse_args()
 
@@ -36,6 +38,8 @@ def main():
     cap = cv2.VideoCapture(0)
     total_frames = 0
     strt = time.time()
+
+    unknown_dir = ''.join(random.choice(string.ascii_letters) for i in range(10))
 
     while cap.isOpened():
         # Capture frame-by-frame
@@ -53,6 +57,8 @@ def main():
             face = frame[bounding_box[1]:bounding_box[1] + bounding_box[3],
                    bounding_box[0]:bounding_box[0] + bounding_box[2]]
 
+            # TODO: this should be a deep copy
+            save_face = face
             # get coordinates for the bounding box from mtcnn
             face_topLeft = bounding_box[0], bounding_box[1]
             face_bottomRight = bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]
@@ -108,6 +114,12 @@ def main():
                     cv2.putText(frame, f' Loss: {loss:.2f}', (face_topLeft[0], face_bottomRight[1] + 20),
                                 cv2.FONT_HERSHEY_PLAIN, 1.5,
                                 (255, 255, 255), 2)
+                # save image of unknown face
+                new_img_name = ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
+                img_path = 'input/' + unknown_dir
+                if not os.path.exists(img_path):
+                    os.mkdir(img_path)
+                cv2.imwrite(img_path + '/' + new_img_name, save_face)
             else:
                 cv2.rectangle(frame, face_topLeft, face_bottomRight, (0, 255, 0), rec_thicc)
                 cv2.rectangle(frame, (face_topLeft[0] - rec_thicc, face_topLeft[1]),
