@@ -80,6 +80,7 @@ def main():
                 # using cosine bc we are trying to find similarity between the found face and the classifiers
                 # loss of -1 means absolute similarity, loss of 1 means absolute dissimilarity
                 cos_sim = losses.CosineSimilarity()
+
                 similarity = cos_sim(classifier[clss], embedded_128).numpy()
                 # if loss is below this value, we found a known face
                 # -.35 seems to work better with masks
