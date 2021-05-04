@@ -24,6 +24,10 @@ def classify(detailed_output=False):
     # hold references to completed classes
     completed_classes = dict()
 
+    classifier_hist = dict()
+    if os.path.exists(classifier_hist_path):
+        classifier_hist = pickle.load(open(classifier_hist_path, 'rb'))
+
     progressbar.streams.wrap_stderr()
 
     if detailed_output:
@@ -38,6 +42,11 @@ def classify(detailed_output=False):
         if "." not in possible_class:
             combined_class_dir = os.path.join(input_directory, possible_class)
             # logging.debug("\n\nTraining on %d for %s", int(len(os.listdir(combined_class_dir))), possible_class)
+            # check early exit
+            if classifier_hist.get(possible_class, -1) == len(os.listdir(combined_class_dir)):
+                if detailed_output:
+                    print("Skipping", possible_class, "since it hasn't changed")
+                continue
             # set up varibles for inner loop
             prediction_results = []
             img_count = 0
@@ -128,6 +137,8 @@ def classify(detailed_output=False):
                         # print(err)
                         continue
 
+            # update classification history
+            classifier_hist[possible_class] = len(os.listdir(combined_class_dir))
             if len(prediction_results) > 0:
                 # normalize results to finalized the classifier for this class
                 preds = tf.reduce_sum(prediction_results, axis=0)
@@ -141,6 +152,7 @@ def classify(detailed_output=False):
 
     # save finished classifier in binary format
     pickle.dump(completed_classes, open(classifer_target, 'bw'))
+    pickle.dump(classifier_hist, open(classifier_hist_path, 'bw'))
 
     # clean up cv2 windows
     if detailed_output:
