@@ -17,6 +17,7 @@ import numpy as np
 from tensorflow.keras import losses
 from tensorflow.keras import utils
 
+import generate_classifier
 from config import *
 
 
@@ -38,6 +39,7 @@ def main():
     cap = cv2.VideoCapture(0)
     total_frames = 0
     strt = time.time()
+    curr_time = time.time()
 
     unknown_dir = ''.join(random.choice(string.ascii_letters) for i in range(10))
 
@@ -50,6 +52,8 @@ def main():
         # get faces from mtcnn
         results = detector.detect_faces(frame)
         for data in results:
+            # update curr_time since we've found a face
+            curr_time = time.time()
             # I'm suspecting this value might need to be higher than we think
             if data['confidence'] >= 0.95:
                 # print("MTCNN Confidence:", data['confidence'])
@@ -151,6 +155,13 @@ def main():
                     if len(files) < face_limit:
                         cv2.imwrite(img_path + '/' + new_img_name, save_face)
 
+        # TODO: Make this multithreaded
+        # update classifier
+        if time.time() - curr_time > inactivity_thresh:
+            if verbose:
+                print("Updating Classifier")
+            classifier = generate_classifier.classify(verbose)
+            curr_time = time.time()
         if verbose:
             # show fps
             fps = total_frames / (time.time() - strt)

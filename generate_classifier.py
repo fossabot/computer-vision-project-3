@@ -27,6 +27,9 @@ def classify(detailed_output=False):
     classifier_hist = dict()
     if os.path.exists(classifier_hist_path):
         classifier_hist = pickle.load(open(classifier_hist_path, 'rb'))
+    old_classifier = dict()
+    if os.path.exists(classifer_target):
+        old_classifier = pickle.load(open(classifer_target, 'rb'))
 
     progressbar.streams.wrap_stderr()
 
@@ -42,10 +45,13 @@ def classify(detailed_output=False):
         if "." not in possible_class:
             combined_class_dir = os.path.join(input_directory, possible_class)
             # logging.debug("\n\nTraining on %d for %s", int(len(os.listdir(combined_class_dir))), possible_class)
+
             # check early exit
+            # TODO: something like a md5 hash might work better here
             if classifier_hist.get(possible_class, -1) == len(os.listdir(combined_class_dir)):
                 if detailed_output:
                     print("Skipping", possible_class, "since it hasn't changed")
+                completed_classes[possible_class] = old_classifier[possible_class]
                 continue
             # set up varibles for inner loop
             prediction_results = []
@@ -157,6 +163,8 @@ def classify(detailed_output=False):
     # clean up cv2 windows
     if detailed_output:
         cv2.destroyAllWindows()
+
+    return completed_classes
 
 
 if __name__ == "__main__":

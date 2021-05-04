@@ -31,6 +31,8 @@ classifer_target = "output/my_classifier.pkl"
 classifier_hist_path = "hist.pkl"
 # how many faces should we store for a class
 face_limit = 30
+# how many seconds of inactivity do we wait before re-classification
+inactivity_thresh = 5
 
 log = logging.getLogger('tensorflow')
 log.setLevel(logging.ERROR)
