@@ -58,7 +58,7 @@ def main():
                    bounding_box[0]:bounding_box[0] + bounding_box[2]]
 
             # TODO: this should be a deep copy
-            save_face = face
+            save_face = np.copy(face)
             # get coordinates for the bounding box from mtcnn
             face_topLeft = bounding_box[0], bounding_box[1]
             face_bottomRight = bounding_box[0] + bounding_box[2], bounding_box[1] + bounding_box[3]
