@@ -24,6 +24,7 @@ from config import *
 def main():
     print("----- Project 3 -----")
 
+    # TODO: Separate the verbose arguments into more specific parts (e.g. an fps arg)
     parser = argparse.ArgumentParser(description='Adaptive Security Camera')
     parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
     args = parser.parse_args()
@@ -41,7 +42,8 @@ def main():
     strt = time.time()
     curr_time = time.time()
 
-    unknown_dir = ''.join(random.choice(string.ascii_letters) for i in range(10))
+    # TODO: Be able to rename these classes to actual human names
+    unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
 
     while cap.isOpened():
         # Capture frame-by-frame
@@ -63,7 +65,6 @@ def main():
                 face = frame[bounding_box[1]:bounding_box[1] + bounding_box[3],
                        bounding_box[0]:bounding_box[0] + bounding_box[2]]
 
-                # TODO: this should be a deep copy
                 save_face = np.copy(face)
                 # get coordinates for the bounding box from mtcnn
                 face_topLeft = bounding_box[0], bounding_box[1]
@@ -125,6 +126,7 @@ def main():
                                     (face_topLeft[0], face_bottomRight[1] + 40),
                                     cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
                     # save image of unknown face
+                    # TODO: the saving of faces could be smarter, randomly delete old ones in favor of newer images?
                     new_img_name = 'unknown_' + ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                     img_path = 'input/' + unknown_dir
                     if not os.path.exists(img_path):
@@ -155,7 +157,7 @@ def main():
                     if len(files) < face_limit:
                         cv2.imwrite(img_path + '/' + new_img_name, save_face)
 
-        # TODO: Make this multithreaded
+        # TODO: Do this with multithreading and be able to notify user elegantly that it is happening
         # update classifier
         if time.time() - curr_time > inactivity_thresh:
             if verbose:

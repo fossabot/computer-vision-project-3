@@ -14,7 +14,7 @@
 
 #### _Required_
 
-* You'll need to have a 64 bit python installation (3.6 - 3.8) along with the following libraies:
+* You'll need to have a 64 bit python installation (3.6 - 3.8) along with the following libraries:
     - tensorflow
     - numpy
     - opencv2

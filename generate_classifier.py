@@ -63,6 +63,7 @@ def classify(detailed_output=False):
                         if detailed_output:
                             print("Skipping", possible_class, "since it hasn't changed. HASH:", file_hash)
                         completed_classes[possible_class] = old_classifier[possible_class]
+
                         continue
             except KeyError:
                 time.sleep(0)
@@ -70,6 +71,8 @@ def classify(detailed_output=False):
             prediction_results = []
             img_count = 0
             files = ""
+            # TODO: optimization: save versions of the input images that are just the face? Would speed things up if we
+            #  are using the standard input images
             for source_image in os.listdir(combined_class_dir):
                 files += source_image
                 # skip readme files since they are not images
@@ -174,6 +177,7 @@ def classify(detailed_output=False):
 
     # save finished classifier in binary format
     pickle.dump(completed_classes, open(classifier_target, 'bw'))
+    # save updated versions of the old things
     pickle.dump(classifier_hash, open(classifier_hash_path, 'bw'))
     pickle.dump(classifier_hist, open(classifier_hist_path, 'bw'))
 
