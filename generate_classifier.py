@@ -17,16 +17,7 @@ import progressbar
 from config import *
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Classifier Generator')
-    parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
-    args = parser.parse_args()
-
-    if args.verbosity > 0:
-        verbose = True
-    else:
-        verbose = False
-
+def classify(detailed_output=False):
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-funneled\\lfw_funneled'
     input_directory = 'input'
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-a\\lfw'
@@ -35,7 +26,7 @@ def main():
 
     progressbar.streams.wrap_stderr()
 
-    if verbose:
+    if detailed_output:
         time.sleep(0)
         print("\n")
     bar = progressbar.ProgressBar(max_value=len(os.listdir(input_directory)), redirect_stderr=True)
@@ -84,7 +75,7 @@ def main():
                             face = cv2.resize(face, inp_size)
 
                             # create training live feed if we are in verbose mode
-                            if verbose:
+                            if detailed_output:
                                 # display float64 image
                                 scale_percent = 200  # percent of original size
                                 width = int(face.shape[1] * scale_percent / 100)
@@ -152,10 +143,19 @@ def main():
     pickle.dump(completed_classes, open(classifer_target, 'bw'))
 
     # clean up cv2 windows
-    if verbose:
+    if detailed_output:
         cv2.destroyAllWindows()
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Classifier Generator')
+    parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
+    args = parser.parse_args()
+
+    if args.verbosity > 0:
+        verbose = True
+    else:
+        verbose = False
+
+    classify(verbose)
     exit()
