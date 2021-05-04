@@ -34,7 +34,7 @@ def main():
         verbose = False
 
     # load classifier dictionary back in
-    classifier = pickle.load(open(classifer_target, 'rb'))
+    classifier = pickle.load(open(classifier_target, 'rb'))
     # load webcam video
     cap = cv2.VideoCapture(0)
     total_frames = 0

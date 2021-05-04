@@ -7,6 +7,7 @@ CMSC 491 Special Topics - Computer Vision
 """
 
 import argparse
+import hashlib
 import pickle
 import time
 
@@ -24,12 +25,16 @@ def classify(detailed_output=False):
     # hold references to completed classes
     completed_classes = dict()
 
+    # load old classifier versions
     classifier_hist = dict()
     if os.path.exists(classifier_hist_path):
         classifier_hist = pickle.load(open(classifier_hist_path, 'rb'))
+    classifier_hash = dict()
+    if os.path.exists(classifier_hash_path):
+        classifier_hash = pickle.load(open(classifier_hash_path, 'rb'))
     old_classifier = dict()
-    if os.path.exists(classifer_target):
-        old_classifier = pickle.load(open(classifer_target, 'rb'))
+    if os.path.exists(classifier_target):
+        old_classifier = pickle.load(open(classifier_target, 'rb'))
 
     progressbar.streams.wrap_stderr()
 
@@ -47,16 +52,26 @@ def classify(detailed_output=False):
             # logging.debug("\n\nTraining on %d for %s", int(len(os.listdir(combined_class_dir))), possible_class)
 
             # check early exit
-            # TODO: something like a md5 hash might work better here
-            if classifier_hist.get(possible_class, -1) == len(os.listdir(combined_class_dir)):
-                if detailed_output:
-                    print("Skipping", possible_class, "since it hasn't changed")
-                completed_classes[possible_class] = old_classifier[possible_class]
-                continue
-            # set up varibles for inner loop
+            try:
+                if classifier_hist.get(possible_class, -1) == len(os.listdir(combined_class_dir)):
+                    # create hash of all image names and compare it to the old one
+                    files = ""
+                    for source_image in os.listdir(combined_class_dir):
+                        files += source_image
+                    file_hash = hashlib.md5(files.encode()).hexdigest()
+                    if file_hash == classifier_hash.get(possible_class, -1):
+                        if detailed_output:
+                            print("Skipping", possible_class, "since it hasn't changed. HASH:", file_hash)
+                        completed_classes[possible_class] = old_classifier[possible_class]
+                        continue
+            except KeyError:
+                time.sleep(0)
+            # set up variables for inner loop
             prediction_results = []
             img_count = 0
+            files = ""
             for source_image in os.listdir(combined_class_dir):
+                files += source_image
                 # skip readme files since they are not images
                 if "README" not in source_image:
                     # update stats
@@ -145,6 +160,7 @@ def classify(detailed_output=False):
 
             # update classification history
             classifier_hist[possible_class] = len(os.listdir(combined_class_dir))
+            classifier_hash[possible_class] = hashlib.md5(files.encode()).hexdigest()
             if len(prediction_results) > 0:
                 # normalize results to finalized the classifier for this class
                 preds = tf.reduce_sum(prediction_results, axis=0)
@@ -157,7 +173,8 @@ def classify(detailed_output=False):
     bar.finish()
 
     # save finished classifier in binary format
-    pickle.dump(completed_classes, open(classifer_target, 'bw'))
+    pickle.dump(completed_classes, open(classifier_target, 'bw'))
+    pickle.dump(classifier_hash, open(classifier_hash_path, 'bw'))
     pickle.dump(classifier_hist, open(classifier_hist_path, 'bw'))
 
     # clean up cv2 windows

@@ -26,9 +26,10 @@ resize_inputs = True
 # what size should the inputs be resized too
 resize_target = 250, 250
 # what classifier do we want to use
-classifer_target = "output/my_classifier.pkl"
+classifier_target = "output/my_classifier.pkl"
 # file to hold classifier history in
 classifier_hist_path = "hist.pkl"
+classifier_hash_path = "hash.pkl"
 # how many faces should we store for a class
 face_limit = 30
 # how many seconds of inactivity do we wait before re-classification
