@@ -27,6 +27,8 @@ resize_inputs = True
 resize_target = 250, 250
 # what classifier do we want to use
 classifer_target = "output/my_classifier.pkl"
+# how many faces should we store for a class
+face_limit = 30
 
 log = logging.getLogger('tensorflow')
 log.setLevel(logging.ERROR)

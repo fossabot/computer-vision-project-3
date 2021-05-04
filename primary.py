@@ -50,8 +50,9 @@ def main():
         # get faces from mtcnn
         results = detector.detect_faces(frame)
         for data in results:
-            print("MTCNN Confidence:", data['confidence'])
-            if data['confidence'] >= 0.9:
+            # I'm suspecting this value might need to be higher than we think
+            if data['confidence'] >= 0.95:
+                # print("MTCNN Confidence:", data['confidence'])
                 # create sub image that contains only the face
                 bounding_box = data['box']
                 bounding_box[0], bounding_box[1] = abs(bounding_box[0]), abs(bounding_box[1])
@@ -116,12 +117,18 @@ def main():
                         cv2.putText(frame, f' Loss: {loss:.2f}', (face_topLeft[0], face_bottomRight[1] + 20),
                                     cv2.FONT_HERSHEY_PLAIN, 1.5,
                                     (255, 255, 255), 2)
+                        cv2.putText(frame, f' Conf: {data["confidence"]:.7f}',
+                                    (face_topLeft[0], face_bottomRight[1] + 40),
+                                    cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
                     # save image of unknown face
-                    new_img_name = 'unknown'+''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
+                    new_img_name = 'unknown_' + ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                     img_path = 'input/' + unknown_dir
                     if not os.path.exists(img_path):
                         os.mkdir(img_path)
-                    cv2.imwrite(img_path + '/' + new_img_name, save_face)
+                    # check to see if unknown is full
+                    files = os.listdir(img_path)
+                    if len(files) < face_limit:
+                        cv2.imwrite(img_path + '/' + new_img_name, save_face)
                 else:
                     cv2.rectangle(frame, face_topLeft, face_bottomRight, (0, 255, 0), rec_thicc)
                     cv2.rectangle(frame, (face_topLeft[0] - rec_thicc, face_topLeft[1]),
@@ -131,8 +138,18 @@ def main():
                                 (0, 0, 0), 2)
                     if verbose:
                         cv2.putText(frame, f' Loss: {loss:.2f}', (face_topLeft[0], face_bottomRight[1] + 20),
-                                    cv2.FONT_HERSHEY_PLAIN, 1.5,
-                                    (0, 0, 0), 2)
+                                    cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 2)
+                        cv2.putText(frame, f' Conf: {data["confidence"]:.7f}',
+                                    (face_topLeft[0], face_bottomRight[1] + 40),
+                                    cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
+
+                    new_img_name = best_clss + '_' + ''.join(
+                        random.choice(string.ascii_letters) for i in range(10)) + ".jpg "
+                    img_path = 'input/' + best_clss
+                    # check to see if target is full
+                    files = os.listdir(img_path)
+                    if len(files) < face_limit:
+                        cv2.imwrite(img_path + '/' + new_img_name, save_face)
 
         if verbose:
             # show fps
