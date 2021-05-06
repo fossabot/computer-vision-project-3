@@ -11,6 +11,7 @@ import pickle
 import random
 import string
 import time
+from multiprocessing import Process
 
 import cv2
 import numpy as np
@@ -35,12 +36,17 @@ def main():
         verbose = False
 
     # load classifier dictionary back in
+    generate_classifier.classify(verbose)
     classifier = pickle.load(open(classifier_target, 'rb'))
     # load webcam video
     cap = cv2.VideoCapture(0)
     total_frames = 0
     strt = time.time()
     curr_time = time.time()
+
+    # create multithreading stuff
+    class_gen_proc = Process(target=generate_classifier.classify())
+    running = False
 
     # TODO: Be able to rename these classes to actual human names
     unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
@@ -50,6 +56,15 @@ def main():
         ret, frame = cap.read()
         # for fps count
         total_frames += 1
+
+        if running and not class_gen_proc.is_alive():
+            unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
+            running = False
+            classifier = pickle.load(open(classifier_target, 'rb'))
+            curr_time = time.time()
+            print("Classifier Updated")
+            class_gen_proc.join()
+            class_gen_proc = Process(target=generate_classifier.classify())
 
         # get faces from mtcnn
         results = detector.detect_faces(frame)
@@ -159,11 +174,13 @@ def main():
 
         # TODO: Do this with multithreading and be able to notify user elegantly that it is happening
         # update classifier
-        if time.time() - curr_time > inactivity_thresh:
+        if time.time() - curr_time > inactivity_thresh and not running:
             if verbose:
                 print("Updating Classifier")
-            classifier = generate_classifier.classify(verbose)
-            curr_time = time.time()
+            class_gen_proc.start()
+            running = True
+            # classifier = generate_classifier.classify(verbose)
+            # curr_time = time.time()
         if verbose:
             # show fps
             fps = total_frames / (time.time() - strt)
@@ -173,6 +190,9 @@ def main():
             cv2.putText(frame, f'Processed FPS: {fps:.2f}', (10, 40), cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
             cv2.putText(frame, "Source: " + str(len(frame)) + "x" + str(len(frame[0])), (10, 60),
                         cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
+            if running:
+                cv2.putText(frame, "Updating Classifier", (10, 80),
+                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 1)
 
         # Display the resulting frame
         cv2.imshow('frame', frame)

@@ -185,7 +185,7 @@ def classify(detailed_output=False):
     if detailed_output:
         cv2.destroyAllWindows()
 
-    return completed_classes
+    # return completed_classes
 
 
 if __name__ == "__main__":
