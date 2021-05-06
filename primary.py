@@ -58,14 +58,15 @@ def main():
         total_frames += 1
 
         if running and not class_gen_proc.is_alive():
+            class_gen_proc.join()
             unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
             running = False
-            classifier = pickle.load(open(classifier_target, 'rb'))
+            # classifier = class_gen_proc.va
             curr_time = time.time()
             print("Classifier Updated")
-            class_gen_proc.join()
             class_gen_proc = Process(target=generate_classifier.classify())
 
+        classifier = pickle.load(open(classifier_target, 'rb'))
         # get faces from mtcnn
         results = detector.detect_faces(frame)
         for data in results:
@@ -106,7 +107,7 @@ def main():
                     similarity = cos_sim(classifier[clss], embedded_128).numpy()
                     # if loss is below this value, we found a known face
                     # -.35 seems to work better with masks
-                    recognition_thresh = -0.40
+                    recognition_thresh = -0.65
                     if similarity < recognition_thresh and similarity < loss:
                         # update tracking vars to current best
                         found_class = True
@@ -174,7 +175,7 @@ def main():
 
         # TODO: Do this with multithreading and be able to notify user elegantly that it is happening
         # update classifier
-        if time.time() - curr_time > inactivity_thresh and not running:
+        if time.time() - curr_time > inactivity_thresh and not running and generate_classifier.check_changed():
             if verbose:
                 print("Updating Classifier")
             class_gen_proc.start()

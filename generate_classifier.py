@@ -18,9 +18,44 @@ import progressbar
 from config import *
 
 
+def check_changed(input_dir=input_directory):
+    # load old classifier versions
+    classifier_hist = dict()
+    if os.path.exists(classifier_hist_path):
+        classifier_hist = pickle.load(open(classifier_hist_path, 'rb'))
+    classifier_hash = dict()
+    if os.path.exists(classifier_hash_path):
+        classifier_hash = pickle.load(open(classifier_hash_path, 'rb'))
+
+    num_classes, unchanged_classes = 0, 0
+    for possible_class in os.listdir(input_dir):
+        if "." not in possible_class:
+            num_classes += 1
+            combined_class_dir = os.path.join(input_dir, possible_class)
+            # logging.debug("\n\nTraining on %d for %s", int(len(os.listdir(combined_class_dir))), possible_class)
+
+            # check early exit
+            try:
+                if classifier_hist.get(possible_class, -1) == len(os.listdir(combined_class_dir)):
+                    # create hash of all image names and compare it to the old one
+                    files = ""
+                    for source_image in os.listdir(combined_class_dir):
+                        files += source_image
+                    file_hash = hashlib.md5(files.encode()).hexdigest()
+                    if file_hash == classifier_hash.get(possible_class, -1):
+                        unchanged_classes += 1
+
+            except KeyError:
+                time.sleep(0)
+
+    if num_classes == unchanged_classes:
+        return False
+    else:
+        return True
+
+
 def classify(detailed_output=False):
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-funneled\\lfw_funneled'
-    input_directory = 'input'
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-a\\lfw'
     # hold references to completed classes
     completed_classes = dict()
@@ -39,7 +74,6 @@ def classify(detailed_output=False):
     progressbar.streams.wrap_stderr()
 
     if detailed_output:
-        time.sleep(0)
         print("\n")
     bar = progressbar.ProgressBar(max_value=len(os.listdir(input_directory)), redirect_stderr=True)
     bar.start()
@@ -67,6 +101,7 @@ def classify(detailed_output=False):
                         continue
             except KeyError:
                 time.sleep(0)
+                # verbose = verbose
             # set up variables for inner loop
             prediction_results = []
             img_count = 0
@@ -185,6 +220,9 @@ def classify(detailed_output=False):
     if detailed_output:
         cv2.destroyAllWindows()
 
+    # time.sleep(10)
+    # for i in range(100000000):
+    #     i = i
     # return completed_classes
 
 

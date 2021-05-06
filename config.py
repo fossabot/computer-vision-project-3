@@ -33,7 +33,9 @@ classifier_hash_path = "hash.pkl"
 # how many faces should we store for a class
 face_limit = 30
 # how many seconds of inactivity do we wait before re-classification
-inactivity_thresh = 5
+inactivity_thresh = 2
+# where are inputs stored
+input_directory = 'input'
 
 log = logging.getLogger('tensorflow')
 log.setLevel(logging.ERROR)
