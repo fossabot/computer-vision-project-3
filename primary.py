@@ -69,6 +69,7 @@ def main():
 
         classifier = pickle.load(open(classifier_target, 'rb'))
         # get faces from mtcnn
+        # TODO: This could be a lot faster if optimized what was going into the detector, maybe downsizing?
         results = detector.detect_faces(frame)
         for data in results:
             # update curr_time since we've found a face
@@ -174,7 +175,6 @@ def main():
                     if len(files) < face_limit:
                         cv2.imwrite(img_path + '/' + new_img_name, save_face)
 
-        # TODO: Do this with multithreading and be able to notify user elegantly that it is happening
         # update classifier
         if time.time() - curr_time > inactivity_thresh and not running and generate_classifier.check_changed():
             if verbose:
