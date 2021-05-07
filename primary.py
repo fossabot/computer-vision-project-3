@@ -37,9 +37,10 @@ def main():
 
     # load classifier dictionary back in
     generate_classifier.classify(verbose)
-    classifier = pickle.load(open(classifier_target, 'rb'))
     # load webcam video
     cap = cv2.VideoCapture(0)
+    # use video file instead
+    # cap = cv2.VideoCapture("C:\\Users\\aings\\Downloads\\C0002_1.MP4")
     total_frames = 0
     strt = time.time()
     curr_time = time.time()
@@ -73,7 +74,7 @@ def main():
             # update curr_time since we've found a face
             curr_time = time.time()
             # I'm suspecting this value might need to be higher than we think
-            if data['confidence'] >= 0.95:
+            if data['confidence'] >= 0.99:
                 # print("MTCNN Confidence:", data['confidence'])
                 # create sub image that contains only the face
                 bounding_box = data['box']
@@ -107,7 +108,7 @@ def main():
                     similarity = cos_sim(classifier[clss], embedded_128).numpy()
                     # if loss is below this value, we found a known face
                     # -.35 seems to work better with masks
-                    recognition_thresh = -0.65
+                    recognition_thresh = -0.50
                     if similarity < recognition_thresh and similarity < loss:
                         # update tracking vars to current best
                         found_class = True
@@ -189,7 +190,7 @@ def main():
             cv2.putText(frame, f'Source FPS: {cap.get(cv2.CAP_PROP_FPS):.2f}', (10, 20), cv2.FONT_HERSHEY_PLAIN, 1,
                         best_clr, 1)
             cv2.putText(frame, f'Processed FPS: {fps:.2f}', (10, 40), cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
-            cv2.putText(frame, "Source: " + str(len(frame)) + "x" + str(len(frame[0])), (10, 60),
+            cv2.putText(frame, "Source: " + str(cap.get(3)) + "x" + str(cap.get(4)), (10, 60),
                         cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
             if running:
                 cv2.putText(frame, "Updating Classifier", (10, 80),
