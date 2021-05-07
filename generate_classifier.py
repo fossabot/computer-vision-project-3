@@ -7,6 +7,7 @@ CMSC 491 Special Topics - Computer Vision
 """
 
 import argparse
+import hashlib
 import pickle
 import time
 
@@ -17,26 +18,62 @@ import progressbar
 from config import *
 
 
-def main():
-    parser = argparse.ArgumentParser(description='Classifier Generator')
-    parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
-    args = parser.parse_args()
+def check_changed(input_dir=input_directory):
+    # load old classifier versions
+    classifier_hist = dict()
+    if os.path.exists(classifier_hist_path):
+        classifier_hist = pickle.load(open(classifier_hist_path, 'rb'))
+    classifier_hash = dict()
+    if os.path.exists(classifier_hash_path):
+        classifier_hash = pickle.load(open(classifier_hash_path, 'rb'))
 
-    if args.verbosity > 0:
-        verbose = True
+    num_classes, unchanged_classes = 0, 0
+    for possible_class in os.listdir(input_dir):
+        if "." not in possible_class:
+            num_classes += 1
+            combined_class_dir = os.path.join(input_dir, possible_class)
+            # logging.debug("\n\nTraining on %d for %s", int(len(os.listdir(combined_class_dir))), possible_class)
+
+            # check early exit
+            try:
+                if classifier_hist.get(possible_class, -1) == len(os.listdir(combined_class_dir)):
+                    # create hash of all image names and compare it to the old one
+                    files = ""
+                    for source_image in os.listdir(combined_class_dir):
+                        files += source_image
+                    file_hash = hashlib.md5(files.encode()).hexdigest()
+                    if file_hash == classifier_hash.get(possible_class, -1):
+                        unchanged_classes += 1
+
+            except KeyError:
+                time.sleep(0)
+
+    if num_classes == unchanged_classes:
+        return False
     else:
-        verbose = False
+        return True
 
+
+def classify(detailed_output=False):
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-funneled\\lfw_funneled'
-    input_directory = 'input'
     # input_directory = 'C:\\Users\\aings\\Downloads\\lfw-a\\lfw'
     # hold references to completed classes
     completed_classes = dict()
 
+    # load old classifier versions
+    classifier_hist = dict()
+    if os.path.exists(classifier_hist_path):
+        classifier_hist = pickle.load(open(classifier_hist_path, 'rb'))
+    classifier_hash = dict()
+    if os.path.exists(classifier_hash_path):
+        classifier_hash = pickle.load(open(classifier_hash_path, 'rb'))
+    old_classifier = dict()
+    if os.path.exists(classifier_target):
+        old_classifier = pickle.load(open(classifier_target, 'rb'))
+
     progressbar.streams.wrap_stderr()
 
-    if verbose:
-        time.sleep(0)
+    if detailed_output:
         print("\n")
     bar = progressbar.ProgressBar(max_value=len(os.listdir(input_directory)), redirect_stderr=True)
     bar.start()
@@ -47,10 +84,32 @@ def main():
         if "." not in possible_class:
             combined_class_dir = os.path.join(input_directory, possible_class)
             # logging.debug("\n\nTraining on %d for %s", int(len(os.listdir(combined_class_dir))), possible_class)
-            # set up varibles for inner loop
+
+            # check early exit
+            try:
+                if classifier_hist.get(possible_class, -1) == len(os.listdir(combined_class_dir)):
+                    # create hash of all image names and compare it to the old one
+                    files = ""
+                    for source_image in os.listdir(combined_class_dir):
+                        files += source_image
+                    file_hash = hashlib.md5(files.encode()).hexdigest()
+                    if file_hash == classifier_hash.get(possible_class, -1):
+                        if detailed_output:
+                            print("Skipping", possible_class, "since it hasn't changed. HASH:", file_hash)
+                        completed_classes[possible_class] = old_classifier[possible_class]
+
+                        continue
+            except KeyError:
+                time.sleep(0)
+                # verbose = verbose
+            # set up variables for inner loop
             prediction_results = []
             img_count = 0
+            files = ""
+            # TODO: optimization: save versions of the input images that are just the face? Would speed things up if we
+            #  are using the standard input images
             for source_image in os.listdir(combined_class_dir):
+                files += source_image
                 # skip readme files since they are not images
                 if "README" not in source_image:
                     # update stats
@@ -84,7 +143,7 @@ def main():
                             face = cv2.resize(face, inp_size)
 
                             # create training live feed if we are in verbose mode
-                            if verbose:
+                            if detailed_output:
                                 # display float64 image
                                 scale_percent = 200  # percent of original size
                                 width = int(face.shape[1] * scale_percent / 100)
@@ -137,6 +196,9 @@ def main():
                         # print(err)
                         continue
 
+            # update classification history
+            classifier_hist[possible_class] = len(os.listdir(combined_class_dir))
+            classifier_hash[possible_class] = hashlib.md5(files.encode()).hexdigest()
             if len(prediction_results) > 0:
                 # normalize results to finalized the classifier for this class
                 preds = tf.reduce_sum(prediction_results, axis=0)
@@ -149,13 +211,30 @@ def main():
     bar.finish()
 
     # save finished classifier in binary format
-    pickle.dump(completed_classes, open(classifer_target, 'bw'))
+    pickle.dump(completed_classes, open(classifier_target, 'bw'))
+    # save updated versions of the old things
+    pickle.dump(classifier_hash, open(classifier_hash_path, 'bw'))
+    pickle.dump(classifier_hist, open(classifier_hist_path, 'bw'))
 
     # clean up cv2 windows
-    if verbose:
+    if detailed_output:
         cv2.destroyAllWindows()
+
+    # time.sleep(10)
+    # for i in range(100000000):
+    #     i = i
+    # return completed_classes
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description='Classifier Generator')
+    parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
+    args = parser.parse_args()
+
+    if args.verbosity > 0:
+        verbose = True
+    else:
+        verbose = False
+
+    classify(verbose)
     exit()

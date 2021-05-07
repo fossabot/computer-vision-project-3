@@ -11,18 +11,21 @@ import pickle
 import random
 import string
 import time
+from multiprocessing import Process
 
 import cv2
 import numpy as np
 from tensorflow.keras import losses
 from tensorflow.keras import utils
 
+import generate_classifier
 from config import *
 
 
 def main():
     print("----- Project 3 -----")
 
+    # TODO: Separate the verbose arguments into more specific parts (e.g. an fps arg)
     parser = argparse.ArgumentParser(description='Adaptive Security Camera')
     parser.add_argument("-v", "--verbosity", type=int, help="increase output verbosity", default=0)
     args = parser.parse_args()
@@ -33,13 +36,21 @@ def main():
         verbose = False
 
     # load classifier dictionary back in
-    classifier = pickle.load(open(classifer_target, 'rb'))
+    generate_classifier.classify(verbose)
     # load webcam video
     cap = cv2.VideoCapture(0)
+    # use video file instead
+    # cap = cv2.VideoCapture("C:\\Users\\aings\\Downloads\\C0002_1.MP4")
     total_frames = 0
     strt = time.time()
+    curr_time = time.time()
 
-    unknown_dir = ''.join(random.choice(string.ascii_letters) for i in range(10))
+    # create multithreading stuff
+    class_gen_proc = Process(target=generate_classifier.classify())
+    running = False
+
+    # TODO: Be able to rename these classes to actual human names
+    unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
 
     while cap.isOpened():
         # Capture frame-by-frame
@@ -47,18 +58,31 @@ def main():
         # for fps count
         total_frames += 1
 
+        if running and not class_gen_proc.is_alive():
+            class_gen_proc.join()
+            unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
+            running = False
+            # classifier = class_gen_proc.va
+            curr_time = time.time()
+            print("Classifier Updated")
+            class_gen_proc = Process(target=generate_classifier.classify())
+
+        classifier = pickle.load(open(classifier_target, 'rb'))
         # get faces from mtcnn
+        # TODO: This could be a lot faster if optimized what was going into the detector, maybe downsizing?
         results = detector.detect_faces(frame)
         for data in results:
-            print("MTCNN Confidence:", data['confidence'])
-            if data['confidence'] >= 0.9:
+            # update curr_time since we've found a face
+            curr_time = time.time()
+            # I'm suspecting this value might need to be higher than we think
+            if data['confidence'] >= 0.99:
+                # print("MTCNN Confidence:", data['confidence'])
                 # create sub image that contains only the face
                 bounding_box = data['box']
                 bounding_box[0], bounding_box[1] = abs(bounding_box[0]), abs(bounding_box[1])
                 face = frame[bounding_box[1]:bounding_box[1] + bounding_box[3],
                        bounding_box[0]:bounding_box[0] + bounding_box[2]]
 
-                # TODO: this should be a deep copy
                 save_face = np.copy(face)
                 # get coordinates for the bounding box from mtcnn
                 face_topLeft = bounding_box[0], bounding_box[1]
@@ -85,7 +109,7 @@ def main():
                     similarity = cos_sim(classifier[clss], embedded_128).numpy()
                     # if loss is below this value, we found a known face
                     # -.35 seems to work better with masks
-                    recognition_thresh = -0.40
+                    recognition_thresh = -0.50
                     if similarity < recognition_thresh and similarity < loss:
                         # update tracking vars to current best
                         found_class = True
@@ -116,12 +140,19 @@ def main():
                         cv2.putText(frame, f' Loss: {loss:.2f}', (face_topLeft[0], face_bottomRight[1] + 20),
                                     cv2.FONT_HERSHEY_PLAIN, 1.5,
                                     (255, 255, 255), 2)
+                        cv2.putText(frame, f' Conf: {data["confidence"]:.7f}',
+                                    (face_topLeft[0], face_bottomRight[1] + 40),
+                                    cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
                     # save image of unknown face
-                    new_img_name = 'unknown'+''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
+                    # TODO: the saving of faces could be smarter, randomly delete old ones in favor of newer images?
+                    new_img_name = 'unknown_' + ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                     img_path = 'input/' + unknown_dir
                     if not os.path.exists(img_path):
                         os.mkdir(img_path)
-                    cv2.imwrite(img_path + '/' + new_img_name, save_face)
+                    # check to see if unknown is full
+                    files = os.listdir(img_path)
+                    if len(files) < face_limit:
+                        cv2.imwrite(img_path + '/' + new_img_name, save_face)
                 else:
                     cv2.rectangle(frame, face_topLeft, face_bottomRight, (0, 255, 0), rec_thicc)
                     cv2.rectangle(frame, (face_topLeft[0] - rec_thicc, face_topLeft[1]),
@@ -131,9 +162,27 @@ def main():
                                 (0, 0, 0), 2)
                     if verbose:
                         cv2.putText(frame, f' Loss: {loss:.2f}', (face_topLeft[0], face_bottomRight[1] + 20),
-                                    cv2.FONT_HERSHEY_PLAIN, 1.5,
-                                    (0, 0, 0), 2)
+                                    cv2.FONT_HERSHEY_PLAIN, 1.5, (0, 0, 0), 2)
+                        cv2.putText(frame, f' Conf: {data["confidence"]:.7f}',
+                                    (face_topLeft[0], face_bottomRight[1] + 40),
+                                    cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
 
+                    new_img_name = best_clss + '_' + ''.join(
+                        random.choice(string.ascii_letters) for i in range(10)) + ".jpg "
+                    img_path = 'input/' + best_clss
+                    # check to see if target is full
+                    files = os.listdir(img_path)
+                    if len(files) < face_limit:
+                        cv2.imwrite(img_path + '/' + new_img_name, save_face)
+
+        # update classifier
+        if time.time() - curr_time > inactivity_thresh and not running and generate_classifier.check_changed():
+            if verbose:
+                print("Updating Classifier")
+            class_gen_proc.start()
+            running = True
+            # classifier = generate_classifier.classify(verbose)
+            # curr_time = time.time()
         if verbose:
             # show fps
             fps = total_frames / (time.time() - strt)
@@ -141,8 +190,11 @@ def main():
             cv2.putText(frame, f'Source FPS: {cap.get(cv2.CAP_PROP_FPS):.2f}', (10, 20), cv2.FONT_HERSHEY_PLAIN, 1,
                         best_clr, 1)
             cv2.putText(frame, f'Processed FPS: {fps:.2f}', (10, 40), cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
-            cv2.putText(frame, "Source: " + str(len(frame)) + "x" + str(len(frame[0])), (10, 60),
+            cv2.putText(frame, "Source: " + str(cap.get(3)) + "x" + str(cap.get(4)), (10, 60),
                         cv2.FONT_HERSHEY_PLAIN, 1, best_clr, 1)
+            if running:
+                cv2.putText(frame, "Updating Classifier", (10, 80),
+                            cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 255), 1)
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
