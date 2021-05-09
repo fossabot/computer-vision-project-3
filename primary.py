@@ -181,7 +181,8 @@ def main():
                 print("Updating Classifier")
             class_gen_proc.start()
             running = True
-            # classifier = generate_classifier.classify(verbose)
+            # classifier =
+            # generate_classifier.classify(verbose)
             # curr_time = time.time()
         if verbose:
             # show fps
