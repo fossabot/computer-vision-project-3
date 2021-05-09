@@ -49,7 +49,7 @@ def main():
     class_gen_proc = Process(target=generate_classifier.classify())
     running = False
 
-    # TODO: Be able to rename these classes to actual human names
+    unknown_count = 0
     unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
 
     while cap.isOpened():
@@ -60,6 +60,7 @@ def main():
 
         if running and not class_gen_proc.is_alive():
             class_gen_proc.join()
+            unknown_count = 0
             unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
             running = False
             # classifier = class_gen_proc.va
@@ -151,8 +152,15 @@ def main():
                         os.mkdir(img_path)
                     # check to see if unknown is full
                     files = os.listdir(img_path)
-                    if len(files) < face_limit:
+                    # save face to current unknown directory
+                    if len(files) < face_limit and unknown_count % face_rate == 1:
+                        unknown_count = 0
                         cv2.imwrite(img_path + '/' + new_img_name, save_face)
+                        if verbose:
+                            cv2.putText(frame, "Saved Face", (10, 100),
+                                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
+                    unknown_count += 1
+
                 else:
                     cv2.rectangle(frame, face_topLeft, face_bottomRight, (0, 255, 0), rec_thicc)
                     cv2.rectangle(frame, (face_topLeft[0] - rec_thicc, face_topLeft[1]),
