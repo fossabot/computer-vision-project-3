@@ -32,6 +32,8 @@ classifier_hist_path = "hist.pkl"
 classifier_hash_path = "hash.pkl"
 # how many faces should we store for a class
 face_limit = 30
+# how often to save faces
+face_rate = 15
 # how many seconds of inactivity do we wait before re-classification
 inactivity_thresh = 2
 # where are inputs stored

@@ -19,6 +19,7 @@ from tensorflow.keras import losses
 from tensorflow.keras import utils
 
 import generate_classifier
+import rename_class
 from config import *
 
 
@@ -49,7 +50,7 @@ def main():
     class_gen_proc = Process(target=generate_classifier.classify())
     running = False
 
-    # TODO: Be able to rename these classes to actual human names
+    unknown_count = 0
     unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
 
     while cap.isOpened():
@@ -60,6 +61,7 @@ def main():
 
         if running and not class_gen_proc.is_alive():
             class_gen_proc.join()
+            unknown_count = 0
             unknown_dir = "new_" + ''.join(random.choice(string.ascii_letters) for i in range(10))
             running = False
             # classifier = class_gen_proc.va
@@ -75,7 +77,7 @@ def main():
             # update curr_time since we've found a face
             curr_time = time.time()
             # I'm suspecting this value might need to be higher than we think
-            if data['confidence'] >= 0.99:
+            if data['confidence'] >= 0.98:
                 # print("MTCNN Confidence:", data['confidence'])
                 # create sub image that contains only the face
                 bounding_box = data['box']
@@ -143,16 +145,23 @@ def main():
                         cv2.putText(frame, f' Conf: {data["confidence"]:.7f}',
                                     (face_topLeft[0], face_bottomRight[1] + 40),
                                     cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
+
                     # save image of unknown face
-                    # TODO: the saving of faces could be smarter, randomly delete old ones in favor of newer images?
                     new_img_name = 'unknown_' + ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                     img_path = 'input/' + unknown_dir
                     if not os.path.exists(img_path):
                         os.mkdir(img_path)
                     # check to see if unknown is full
                     files = os.listdir(img_path)
-                    if len(files) < face_limit:
+                    # save face to current unknown directory
+                    if len(files) < face_limit and unknown_count % face_rate == 1:
+                        unknown_count = 0
                         cv2.imwrite(img_path + '/' + new_img_name, save_face)
+                        if verbose:
+                            cv2.putText(frame, "Saved Face", (10, 100),
+                                        cv2.FONT_HERSHEY_PLAIN, 1, (0, 255, 0), 1)
+                    unknown_count += 1
+
                 else:
                     cv2.rectangle(frame, face_topLeft, face_bottomRight, (0, 255, 0), rec_thicc)
                     cv2.rectangle(frame, (face_topLeft[0] - rec_thicc, face_topLeft[1]),
@@ -181,7 +190,8 @@ def main():
                 print("Updating Classifier")
             class_gen_proc.start()
             running = True
-            # classifier = generate_classifier.classify(verbose)
+            # classifier =
+            # generate_classifier.classify(verbose)
             # curr_time = time.time()
         if verbose:
             # show fps
@@ -198,8 +208,14 @@ def main():
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        # quit if q key is pressed
+        if cv2.waitKey(1) == ord('q'):
             break
+        # rename classes if a key is pressed
+        if cv2.waitKey(33) == ord('a'):
+            rename_class.rename_class_dir()
+            generate_classifier.classify(verbose)
+            curr_time = time.time()
 
     # When everything done, release the capture
     cap.release()
