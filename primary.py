@@ -77,7 +77,7 @@ def main():
             # update curr_time since we've found a face
             curr_time = time.time()
             # I'm suspecting this value might need to be higher than we think
-            if data['confidence'] >= 0.99:
+            if data['confidence'] >= 0.98:
                 # print("MTCNN Confidence:", data['confidence'])
                 # create sub image that contains only the face
                 bounding_box = data['box']
