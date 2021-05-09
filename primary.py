@@ -19,6 +19,7 @@ from tensorflow.keras import losses
 from tensorflow.keras import utils
 
 import generate_classifier
+import rename_class
 from config import *
 
 
@@ -144,8 +145,8 @@ def main():
                         cv2.putText(frame, f' Conf: {data["confidence"]:.7f}',
                                     (face_topLeft[0], face_bottomRight[1] + 40),
                                     cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
+
                     # save image of unknown face
-                    # TODO: the saving of faces could be smarter, randomly delete old ones in favor of newer images?
                     new_img_name = 'unknown_' + ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                     img_path = 'input/' + unknown_dir
                     if not os.path.exists(img_path):
@@ -207,8 +208,14 @@ def main():
 
         # Display the resulting frame
         cv2.imshow('frame', frame)
-        if cv2.waitKey(1) & 0xFF == ord('q'):
+        # quit if q key is pressed
+        if cv2.waitKey(1) == ord('q'):
             break
+        # rename classes if a key is pressed
+        if cv2.waitKey(33) == ord('a'):
+            rename_class.rename_class_dir()
+            generate_classifier.classify(verbose)
+            curr_time = time.time()
 
     # When everything done, release the capture
     cap.release()

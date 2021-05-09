@@ -5,7 +5,6 @@ from config import *
 
 
 def rename_class_dir(inp_dir=input_directory):
-
     # iterate over all classes in input folder
     for possible_class in os.listdir(inp_dir):
 
@@ -16,7 +15,7 @@ def rename_class_dir(inp_dir=input_directory):
             loaded_img = cv2.imread(os.path.join(combined_class_dir, imgs[0]))
 
             # Show user first face in unknown class
-            cv2.imshow("normalized float64", loaded_img)
+            cv2.imshow("WHOMSTVE IS THIS?", loaded_img)
 
             # hold thingy so cv2 doesn't freak out
             if cv2.waitKey(1) & 0xFF == ord('q'):
@@ -31,5 +30,5 @@ def rename_class_dir(inp_dir=input_directory):
 
 
 if __name__ == "__main__":
-    main()
+    rename_class_dir()
     exit()
