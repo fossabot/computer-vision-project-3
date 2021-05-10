@@ -71,7 +71,8 @@ def main():
 
         classifier = pickle.load(open(classifier_target, 'rb'))
         # get faces from mtcnn
-        # TODO: This could be a lot faster if optimized what was going into the detector, maybe downsizing?
+        if resize_frame:
+            frame = cv2.resize(frame, (int(cap.get(3)) // 2, int(cap.get(4)) // 2), interpolation=cv2.INTER_AREA)
         results = detector.detect_faces(frame)
         for data in results:
             # update curr_time since we've found a face

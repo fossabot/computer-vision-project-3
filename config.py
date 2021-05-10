@@ -23,6 +23,8 @@ detector = mtcnn_cv2.MTCNN()
 use_gpu = False
 # should inputs be resized
 resize_inputs = True
+# should frame be resized
+resize_frame = False
 # what size should the inputs be resized too
 resize_target = 250, 250
 # what classifier do we want to use
