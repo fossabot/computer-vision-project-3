@@ -33,11 +33,11 @@ classifier_target = "output/my_classifier.pkl"
 classifier_hist_path = "hist.pkl"
 classifier_hash_path = "hash.pkl"
 # how many faces should we store for a class
-face_limit = 30
+face_limit = 100
 # how often to save faces
-face_rate = 15
+face_rate = 3
 # how many seconds of inactivity do we wait before re-classification
-inactivity_thresh = 2
+inactivity_thresh = 1.5
 # where are inputs stored
 input_directory = 'input'
 

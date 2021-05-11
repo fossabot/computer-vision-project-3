@@ -41,13 +41,13 @@ def main():
     # load webcam video
     cap = cv2.VideoCapture(0)
     # use video file instead
-    # cap = cv2.VideoCapture("C:\\Users\\aings\\Downloads\\C0002_1.MP4")
+    # cap = cv2.VideoCapture("C:\\Users\\aings\\Downloads\\C0002.MP4")
     total_frames = 0
     strt = time.time()
     curr_time = time.time()
 
     # create multithreading stuff
-    class_gen_proc = Process(target=generate_classifier.classify())
+    class_gen_proc = Process(target=generate_classifier.classify(verbose))
     running = False
 
     unknown_count = 0
@@ -67,7 +67,7 @@ def main():
             # classifier = class_gen_proc.va
             curr_time = time.time()
             print("Classifier Updated")
-            class_gen_proc = Process(target=generate_classifier.classify())
+            class_gen_proc = Process(target=generate_classifier.classify(verbose))
 
         classifier = pickle.load(open(classifier_target, 'rb'))
         # get faces from mtcnn
@@ -78,7 +78,7 @@ def main():
             # update curr_time since we've found a face
             curr_time = time.time()
             # I'm suspecting this value might need to be higher than we think
-            if data['confidence'] >= 0.98:
+            if data['confidence'] >= 0.994:
                 # print("MTCNN Confidence:", data['confidence'])
                 # create sub image that contains only the face
                 bounding_box = data['box']
@@ -112,7 +112,7 @@ def main():
                     similarity = cos_sim(classifier[clss], embedded_128).numpy()
                     # if loss is below this value, we found a known face
                     # -.35 seems to work better with masks
-                    recognition_thresh = -0.50
+                    recognition_thresh = -0.55
                     if similarity < recognition_thresh and similarity < loss:
                         # update tracking vars to current best
                         found_class = True
@@ -148,14 +148,14 @@ def main():
                                     cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
 
                     # save image of unknown face
-                    new_img_name = 'unknown_' + ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
+                    new_img_name = ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                     img_path = 'input/' + unknown_dir
                     if not os.path.exists(img_path):
                         os.mkdir(img_path)
                     # check to see if unknown is full
                     files = os.listdir(img_path)
                     # save face to current unknown directory
-                    if len(files) < face_limit and unknown_count % face_rate == 1:
+                    if len(files) < face_limit and unknown_count % face_rate == 0:
                         unknown_count = 0
                         cv2.imwrite(img_path + '/' + new_img_name, save_face)
                         if verbose:
@@ -177,8 +177,7 @@ def main():
                                     (face_topLeft[0], face_bottomRight[1] + 40),
                                     cv2.FONT_HERSHEY_PLAIN, 1, (0, 0, 0), 2)
 
-                    new_img_name = best_clss + '_' + ''.join(
-                        random.choice(string.ascii_letters) for i in range(10)) + ".jpg "
+                    new_img_name = ''.join(random.choice(string.ascii_letters) for i in range(10)) + ".jpg"
                     img_path = 'input/' + best_clss
                     # check to see if target is full
                     files = os.listdir(img_path)
@@ -214,7 +213,7 @@ def main():
             break
         # rename classes if a key is pressed
         if cv2.waitKey(33) == ord('a'):
-            rename_class.rename_class_dir()
+            rename_class.rename_class_dir(ignore_dir=unknown_dir)
             generate_classifier.classify(verbose)
             curr_time = time.time()
 
