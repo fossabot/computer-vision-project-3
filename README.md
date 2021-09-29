@@ -9,6 +9,7 @@
 </p>
 
 ![andrew_processing](results/preprocessing.jpg)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FADMARIl%2Fcomputer-vision-project-3.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2FADMARIl%2Fcomputer-vision-project-3?ref=badge_shield)
 
 ## Installation
 
@@ -67,3 +68,7 @@ Andrew and Unrecognized
 
 For testing [Labeled Faces in the Wild](http://vis-www.cs.umass.edu/lfw/index.html#download) is used which is based
 on [this paper](http://vis-www.cs.umass.edu/papers/iccv07alignment.pdf)
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2FADMARIl%2Fcomputer-vision-project-3.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2FADMARIl%2Fcomputer-vision-project-3?ref=badge_large)
